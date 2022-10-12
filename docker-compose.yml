@@ -1,0 +1,63 @@
+version: '1'
+services:
+  redis:
+    image: redis:7.0.5
+
+  db:
+    image: mysql:8.0.30
+    command: --default-authentication-plugin=mysql_native_password --sql_mode=""
+    restart: always
+    environment:
+      - "MYSQL_USER=misp"
+      - "MYSQL_PASSWORD=password"
+      - "MYSQL_ROOT_PASSWORD=password"
+      - "MYSQL_DATABASE=misp"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    cap_add:
+      - SYS_NICE  # CAP_SYS_NICE Prevent runaway mysql log
+
+  misp:
+    image: abbad3/misp:1.0
+    depends_on:
+      - redis
+      - db
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./data/Config:/var/www/MISP/app/Config"
+      - "./data/logs:/var/www/MISP/app/tmp/logs"
+      - "./data/files:/var/www/MISP/app/files"
+      - "./data/gpg/gpg.asc:/var/www/MISP/app/webroot/gpg.asc"
+      - "./data/.gnupg:/var/www/MISP/.gnupg"
+      - "./data/ssl:/etc/nginx/certs"
+      - "./data/clamav:/clamav"
+    environment:
+      - "HOSTNAME=https://localhost"
+      - "REDIS_FQDN=redis"
+      - "INIT=true"             # Initialze MISP, things includes, attempting to import SQL and the Files DIR
+      - "CRON_USER_ID=1"        # The MISP user ID to run cron jobs as
+#      - "SYNCSERVERS=1 2 3 4"  # The MISP Feed servers to sync in the cron job
+      # Database Configuration (And their defaults)
+      - "MYSQL_HOST=db"
+      - "MYSQL_USER=misp"
+      - "MYSQL_PASSWORD=password" # NOTE: This should be AlphaNum with no Special Chars. Otherwise, edit config files after first run. 
+      - "MYSQL_DATABASE=misp"
+      # Optional Settings
+#      - "NOREDIR=true" # Do not redirect port 80
+#      - "DISIPV6=true" # Disable IPV6 in nginx
+#      - "CERTAUTH=optional" # Can be set to optional or on - Step 2 of https://github.com/MISP/MISP/tree/2.4/app/Plugin/CertAuth is still required
+#      - "SECURESSL=true" # Enable higher security SSL in nginx
+#      - "MISP_MODULES_FQDN=http://misp-modules" # Set the MISP Modules FQDN, used for Enrichment_services_url/Import_services_url/Export_services_url
+#      - "WORKERS=1" #If set to a value larger than 1 this will increase the number of parallel worker processes
+  misp-modules:
+    image: abbad3/misp-modules:1.0
+    environment:
+      - "REDIS_BACKEND=redis"
+    depends_on:
+      - redis
+      - db
+
+volumes:
+    mysql_data:

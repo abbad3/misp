@@ -18,7 +18,7 @@ services:
       - SYS_NICE  # CAP_SYS_NICE Prevent runaway mysql log
 
   misp:
-    image: abbad3/misp:1.0
+    image: abbad3/misp:1.1
     depends_on:
       - redis
       - db
@@ -52,7 +52,7 @@ services:
 #      - "MISP_MODULES_FQDN=http://misp-modules" # Set the MISP Modules FQDN, used for Enrichment_services_url/Import_services_url/Export_services_url
 #      - "WORKERS=1" #If set to a value larger than 1 this will increase the number of parallel worker processes
   misp-modules:
-    image: abbad3/misp-modules:1.0
+    image: abbad3/misp-modules:1.1
     environment:
       - "REDIS_BACKEND=redis"
     depends_on:

@@ -1,4 +1,4 @@
-FROM python:3.10.7-slim-bullseye  as builder
+FROM python:3.9-slim-bullseye  as builder
 ENV DEBIAN_FRONTEND noninteractive
 ARG MODULES_TAG
 
@@ -32,7 +32,7 @@ RUN pip3 install --upgrade pip
     RUN find . -name "chardet*" | grep -v "chardet-4.0.0" | xargs rm -f
 
 
-FROM python:3.10.7-slim-bullseye
+FROM python:3.9-slim-bullseye
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
             libglib2.0-0 \

@@ -2,8 +2,8 @@ version: '1'
 services:
   redis:
     image: redis:7.0.5
-  networks:
-    - rede-misp
+    networks:
+      - rede-misp
 
   db:
     image: mysql:8.0.30
@@ -19,6 +19,8 @@ services:
       - "./data/mysql:/var/lib/mysql"
     cap_add:
       - SYS_NICE  # CAP_SYS_NICE Prevent runaway mysql log
+    networks:
+      - rede-misp
 
   misp:
     image: abbad3/misp:1.1
@@ -54,8 +56,8 @@ services:
 #      - "SECURESSL=true" # Enable higher security SSL in nginx
 #      - "MISP_MODULES_FQDN=http://misp-modules" # Set the MISP Modules FQDN, used for Enrichment_services_url/Import_services_url/Export_services_url
 #      - "WORKERS=1" #If set to a value larger than 1 this will increase the number of parallel worker processes
-  networks:
-    - rede-misp
+    networks:
+      - rede-misp
 
   misp-modules:
     image: abbad3/misp-modules:1.1
@@ -64,7 +66,7 @@ services:
     depends_on:
       - redis
       - db
-  networks:
-    - rede-misp
+    networks:
+      - rede-misp
 networks:
   rede-misp:

@@ -2,15 +2,18 @@ version: '1'
 services:
   redis:
     image: redis:7.0.5
+  networks:
+    - rede-misp
 
   db:
     image: mysql:8.0.30
-    command: --default-authentication-plugin=mysql_native_password --sql_mode=""
+    #command: --default-authentication-plugin=mysql_native_password --sql_mode=""
+    command: --sql_mode=""
     restart: always
     environment:
       - "MYSQL_USER=misp"
-      - "MYSQL_PASSWORD=password"
-      - "MYSQL_ROOT_PASSWORD=password"
+      - "MYSQL_PASSWORD=apgBtgmHhiDJvE6IOxXh/zucwHaJUCAZegr4MCgQCsw="
+      - "MYSQL_ROOT_PASSWORD=UYzngHzwcnhMcw58Apkv88jzL5A+pGvnpEA6Gf3GjyA="
       - "MYSQL_DATABASE=misp"
     volumes:
       - "./data/mysql:/var/lib/mysql"
@@ -42,7 +45,7 @@ services:
       # Database Configuration (And their defaults)
       - "MYSQL_HOST=db"
       - "MYSQL_USER=misp"
-      - "MYSQL_PASSWORD=password" # NOTE: This should be AlphaNum with no Special Chars. Otherwise, edit config files after first run. 
+      - "MYSQL_PASSWORD=apgBtgmHhiDJvE6IOxXh/zucwHaJUCAZegr4MCgQCsw="
       - "MYSQL_DATABASE=misp"
       # Optional Settings
 #      - "NOREDIR=true" # Do not redirect port 80
@@ -51,6 +54,9 @@ services:
 #      - "SECURESSL=true" # Enable higher security SSL in nginx
 #      - "MISP_MODULES_FQDN=http://misp-modules" # Set the MISP Modules FQDN, used for Enrichment_services_url/Import_services_url/Export_services_url
 #      - "WORKERS=1" #If set to a value larger than 1 this will increase the number of parallel worker processes
+  networks:
+    - rede-misp
+
   misp-modules:
     image: abbad3/misp-modules:1.1
     environment:
@@ -58,3 +64,7 @@ services:
     depends_on:
       - redis
       - db
+  networks:
+    - rede-misp
+networks:
+  rede-misp:

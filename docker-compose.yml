@@ -7,12 +7,12 @@ services:
 
   db:
     image: mysql:8.0.30
-    command: --default-authentication-plugin=mysql_native_password --sql_mode=""
+    command: --sql_mode=""
     restart: always
     environment:
       - "MYSQL_USER=misp"
-      - "MYSQL_PASSWORD=apgBtgmHhiDJvE6IOxXh/zucwHaJUCAZegr4MCgQCsw="
-      - "MYSQL_ROOT_PASSWORD=UYzngHzwcnhMcw58Apkv88jzL5A+pGvnpEA6Gf3GjyA="
+      - "MYSQL_PASSWORD=senhadomisp"
+      - "MYSQL_ROOT_PASSWORD=senhadoroot"
       - "MYSQL_DATABASE=misp"
     volumes:
       - "./data/mysql:/var/lib/mysql"
@@ -46,7 +46,7 @@ services:
       # Database Configuration (And their defaults)
       - "MYSQL_HOST=db"
       - "MYSQL_USER=misp"
-      - "MYSQL_PASSWORD=apgBtgmHhiDJvE6IOxXh/zucwHaJUCAZegr4MCgQCsw="
+      - "MYSQL_PASSWORD=senhadomisp"
       - "MYSQL_DATABASE=misp"
       # Optional Settings
 #      - "NOREDIR=true" # Do not redirect port 80

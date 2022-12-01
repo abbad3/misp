@@ -1,4 +1,11 @@
-version: '1'
+version: '3.9'
+
+secrets:
+  mysql_misp_password:
+    external: true
+  mysql_root_password:
+    external: true
+
 services:
   redis:
     image: redis:7.0.5
@@ -8,21 +15,31 @@ services:
   db:
     image: mysql:8.0.30
     command: --sql_mode=""
-    restart: always
+#    restart: always
+    secrets:
+      - mysql_misp_password 
+      - mysql_root_password 
+    ports: 
+      - "3306:3306"
     environment:
       - "MYSQL_USER=misp"
-      - "MYSQL_PASSWORD=senhadomisp"
-      - "MYSQL_ROOT_PASSWORD=senhadoroot"
+      - "MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password"
+      - "MYSQL_PASSWORD_FILE=/run/secrets/mysql_misp_password"
+      #- "MYSQL_PASSWORD=7e41fcec14d4bf5773983963c44d8f5c"
+      #- "MYSQL_ROOT_PASSWORD=95b14cfe4807d58213952647941297e6"
       - "MYSQL_DATABASE=misp"
     volumes:
-      - "./data/mysql:/var/lib/mysql"
+      #- "./data/mysql:/var/lib/mysql"
+      - mysql_data:/var/lib/mysql
     cap_add:
       - SYS_NICE  # CAP_SYS_NICE Prevent runaway mysql log
     networks:
-      - rede-misp
+       - rede-misp
 
   misp:
-    image: abbad3/misp:1.1
+    image: abbad3/misp:1.2
+    secrets:
+      - mysql_misp_password 
     depends_on:
       - redis
       - db
@@ -38,7 +55,7 @@ services:
       - "./data/ssl:/etc/nginx/certs"
       - "./data/clamav:/clamav"
     environment:
-      - "HOSTNAME=https://localhost"
+      - "HOSTNAME=https://misp.tce.sp.gov.br"
       - "REDIS_FQDN=redis"
       - "INIT=true"             # Initialze MISP, things includes, attempting to import SQL and the Files DIR
       - "CRON_USER_ID=1"        # The MISP user ID to run cron jobs as
@@ -46,7 +63,9 @@ services:
       # Database Configuration (And their defaults)
       - "MYSQL_HOST=db"
       - "MYSQL_USER=misp"
-      - "MYSQL_PASSWORD=senhadomisp"
+      #- "MYSQL_PASSWORD=7e41fcec14d4bf5773983963c44d8f5c"
+      - "MYSQL_PASSWORD_FILE=/run/secrets/mysql_misp_password"
+      #- "MYSQL_PASSWORD=7e41fcec14d4bf5773983963c44d8f5c" # NOTE: This should be AlphaNum with no Special Chars. Otherwise, edit config files after first run. 
       - "MYSQL_DATABASE=misp"
       # Optional Settings
 #      - "NOREDIR=true" # Do not redirect port 80
@@ -56,7 +75,7 @@ services:
 #      - "MISP_MODULES_FQDN=http://misp-modules" # Set the MISP Modules FQDN, used for Enrichment_services_url/Import_services_url/Export_services_url
 #      - "WORKERS=1" #If set to a value larger than 1 this will increase the number of parallel worker processes
     networks:
-      - rede-misp
+      - rede-misp  
 
   misp-modules:
     image: abbad3/misp-modules:1.1
@@ -66,6 +85,10 @@ services:
       - redis
       - db
     networks:
-      - rede-misp
+      - rede-misp  
+
 networks:
   rede-misp:
+
+volumes:
+    mysql_data:
